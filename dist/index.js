@@ -1,0 +1,2 @@
+var n,e=(n=require("trigger"))&&"object"==typeof n&&"default"in n?n.default:n;module.exports=function(n){void 0===n&&(n=1);var t=[],r=0,i=e();return i.fire(),{push:function(n){return new Promise(function(f,c){t.push(function(){0==r++&&(i=e());try{Promise.resolve(n()).then(function(n){f(n),u()},function(n){c(n),u()})}catch(n){c(n),u()}}),o()})},get running(){return r},get pending(){return t.length},get idle(){return i}};function u(){r--,o()}function o(){r>=n||(t.length||r||i.fire(),t.length&&t.shift()())}};
+//# sourceMappingURL=index.js.map

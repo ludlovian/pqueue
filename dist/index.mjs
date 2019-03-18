@@ -1,0 +1,2 @@
+import n from"trigger";export default function(t){void 0===t&&(t=1);var e=[],r=0,i=n();return i.fire(),{push:function(t){return new Promise(function(f,c){e.push(function(){0==r++&&(i=n());try{Promise.resolve(t()).then(function(n){f(n),u()},function(n){c(n),u()})}catch(n){c(n),u()}}),o()})},get running(){return r},get pending(){return e.length},get idle(){return i}};function u(){r--,o()}function o(){r>=t||(e.length||r||i.fire(),e.length&&e.shift()())}}
+//# sourceMappingURL=index.mjs.map
