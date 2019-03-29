@@ -1,6 +1,6 @@
 import test from 'ava'
-import pqueue from '../src'
-import trigger from 'trigger'
+import PQueue from '../src'
+import Trigger from 'trigger'
 
 const isResolved = (p, ms = 10) =>
   new Promise(resolve => {
@@ -8,14 +8,16 @@ const isResolved = (p, ms = 10) =>
     setTimeout(() => resolve(false), ms)
   })
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 test('queue - basic operation', async t => {
-  const q = pqueue()
+  const q = new PQueue()
 
   t.true(await isResolved(q.idle))
   t.is(q.pending, 0)
   t.is(q.running, 0)
 
-  const t1 = trigger()
+  const t1 = new Trigger()
   const p1 = q.push(() => t1)
   t.false(await isResolved(p1))
   t.false(await isResolved(q.idle))
@@ -23,7 +25,7 @@ test('queue - basic operation', async t => {
   t.is(q.pending, 0)
   t.is(q.running, 1)
 
-  const t2 = trigger()
+  const t2 = new Trigger()
   const p2 = q.push(() => t2)
   t.is(q.pending, 1)
   t.is(q.running, 1)
@@ -43,15 +45,17 @@ test('queue - basic operation', async t => {
 })
 
 test('queue - with concurrency', async t => {
-  const q = pqueue(2)
+  const q = new PQueue(2)
 
-  const t1 = trigger()
-  const t2 = trigger()
-  const t3 = trigger()
+  const t1 = new Trigger()
+  const t2 = new Trigger()
+  const t3 = new Trigger()
 
   const p1 = q.push(() => t1)
   const p2 = q.push(() => t2)
   const p3 = q.push(() => t3)
+
+  await delay(20)
 
   t.is(q.running, 2)
   t.is(q.pending, 1)
@@ -81,10 +85,11 @@ test('queue - with concurrency', async t => {
 })
 
 test('jobs that reject', async t => {
-  const q = pqueue()
-  const t1 = trigger()
+  const q = new PQueue()
+  const t1 = new Trigger()
   const p1 = q.push(() => t1)
 
+  await delay(10)
   t.is(q.running, 1)
 
   const err = new Error('oops')
@@ -97,7 +102,7 @@ test('jobs that reject', async t => {
 })
 
 test('jobs that throw', async t => {
-  const q = pqueue()
+  const q = new PQueue()
   const err = new Error('oops')
   const f1 = () => {
     throw err

@@ -1,12 +1,10 @@
-import resolve from 'rollup-plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 import cleanup from 'rollup-plugin-cleanup'
 
 export default {
   input: 'src/index.js',
-  external: [ 'trigger' ],
+  external: [ 'plock', 'pswitch' ],
   plugins: [
-    resolve(),
     cleanup(),
     process.env.NODE_ENV === 'production' && terser()
   ],

@@ -1,72 +1,37 @@
 'use strict'
 
-import trigger from 'trigger'
+import PLock from 'plock'
+import PSwitch from 'pswitch'
 
-export default function pqueue (width = 1) {
-  const q = []
-  let running = 0
-  let _idle = trigger()
-  let _busy = trigger()
-  setIdle()
+export default class PQueue {
+  constructor (width = 1) {
+    this._lock = new PLock(width)
+    this._busy = new PSwitch(false)
+    this.pending = 0
+  }
 
-  return {
-    push,
-    get running () {
-      return running
-    },
-    get pending () {
-      return q.length
-    },
-    get idle () {
-      return _idle
-    },
-    get busy () {
-      return _busy
+  async push (fn) {
+    this.pending++
+    this._busy.set(true)
+    await this._lock.lock()
+    this.pending--
+    try {
+      return await Promise.resolve(fn())
+    } finally {
+      this._lock.release()
+      if (this.running === 0 && this.pending === 0) this._busy.set(false)
     }
   }
 
-  function push (fn) {
-    return new Promise((resolve, reject) => {
-      q.push(() => {
-        if (running++ === 0) setBusy()
-        try {
-          Promise.resolve(fn()).then(
-            value => {
-              resolve(value)
-              done()
-            },
-            reason => {
-              reject(reason)
-              done()
-            }
-          )
-        } catch (reason) {
-          reject(reason)
-          done()
-        }
-      })
-      startOne()
-    })
+  get idle () {
+    return this._busy.whenOff
   }
 
-  function done () {
-    running--
-    startOne()
+  get busy () {
+    return this._busy.whenOn
   }
 
-  function startOne () {
-    if (running >= width) return
-    if (!q.length && !running) setIdle()
-    if (q.length) q.shift()()
-  }
-
-  function setIdle () {
-    _idle.fire()
-    _busy = trigger()
-  }
-
-  function setBusy () {
-    _busy.fire()
-    _idle = trigger()
+  get running () {
+    return this._lock.locks
   }
 }
