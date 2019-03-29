@@ -7,7 +7,7 @@ Simple scheduler of promises to restrict concurrency
 
 ### pqueue
 
-`p = pqueue(concurrency)`
+`p = new PQueue(concurrency)`
 
 creates a queue with the specified concurrency (defaults to 1)
 
@@ -37,3 +37,9 @@ returns how many jobs/functions are currently pending in the queue
 `await queue.idle`
 
 a `Promise` which reoslves once the queue is idle (no more jobs to process)
+
+### .busy
+
+`await queue.busy`
+
+a `Promise` which reoslves once the queue is busy (jobs being processed)
