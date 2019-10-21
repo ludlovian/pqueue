@@ -24,11 +24,11 @@ export default class PQueue {
   }
 
   get idle () {
-    return this._busy.whenOff
+    return this._busy.when(false)
   }
 
   get busy () {
-    return this._busy.whenOn
+    return this._busy.when(true)
   }
 
   get running () {
